@@ -16,7 +16,47 @@ const Copilot = () => {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
   const messagesEndRef = useRef(null);
+
+  const handleMouseDown = (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest(".copilot-header-btn") || e.target.closest("button")) {
+      return;
+    }
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      const newX = e.clientX - dragStart.current.x;
+      const newY = e.clientY - dragStart.current.y;
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   // Initialize first chat thread ID if not set
   useEffect(() => {
@@ -145,9 +185,14 @@ const Copilot = () => {
 
       {/* Copilot Main Window */}
       {isOpen && (
-        <div className="copilot-window">
+        <div
+          className="copilot-window"
+          style={{
+            transform: `translate(${position.x}px, ${position.y}px)`,
+          }}
+        >
           {/* Header */}
-          <div className="copilot-header">
+          <div className="copilot-header" onMouseDown={handleMouseDown}>
             <div className="copilot-header-title">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="10" rx="2"></rect>

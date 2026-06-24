@@ -7,7 +7,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [repositories, setRepositories] = useState([]); // user repos
   const [suggestedRepositories, setSuggestedRepositories] = useState([]); // all repos
-  const [displayCount, setDisplayCount] = useState(4); // Show 4 repos initially
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // 🔹 LEFT SEARCH (user repos)
   const [userSearch, setUserSearch] = useState("");
@@ -186,32 +186,34 @@ const Dashboard = () => {
 
           {/* 🔥 TRENDING */}
           {!globalSearch && (
-            <div className="suggested-section">
-              {suggestedRepositories.slice(0, displayCount).map((repo) => (
-                <div
-                  key={repo._id}
-                  className="repo-card"
-                  onClick={() => navigate(`/repo/${repo._id}`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <div className="repo-card-header">
-                    <h4>{repo.name}</h4>
+            <>
+              <div className={`suggested-section ${isExpanded ? "expanded" : ""}`}>
+                {suggestedRepositories.slice(0, isExpanded ? suggestedRepositories.length : 3).map((repo) => (
+                  <div
+                    key={repo._id}
+                    className="repo-card"
+                    onClick={() => navigate(`/repo/${repo._id}`)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="repo-card-header">
+                      <h4>{repo.name}</h4>
+                    </div>
+                    <div className="repo-card-description">
+                      <p>{repo.description || "No description available"}</p>
+                    </div>
                   </div>
-                  <div className="repo-card-description">
-                    <p>{repo.description || "No description available"}</p>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
 
-              {suggestedRepositories.length > displayCount && (
+              {!isExpanded && suggestedRepositories.length > 3 && (
                 <button
                   className="more-btn"
-                  onClick={() => setDisplayCount(displayCount + 5)}
+                  onClick={() => setIsExpanded(true)}
                 >
                   More
                 </button>
               )}
-            </div>
+            </>
           )}
         </main>
 
