@@ -43,7 +43,8 @@ const Dashboard = () => {
       try {
         const response = await fetch(`http://localhost:3001/repo/all`);
         const data = await response.json();
-        setSuggestedRepositories(data || []);
+        const publicRepos = (data || []).filter((repo) => !repo.visibility);
+        setSuggestedRepositories(publicRepos);
       } catch (err) {
         console.error("Error fetching all repos:", err);
       }
